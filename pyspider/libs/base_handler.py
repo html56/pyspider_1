@@ -408,13 +408,42 @@ class BaseHandler(object):
 
     def on_result(self, result):
         """Receiving returns from other callback, override me."""
-        if not result:
-            return
-        assert self.task, "on_result can't outside a callback."
-        if self.is_debugger():
-            pprint(result)
-        if self.__env__.get('result_queue'):
-            self.__env__['result_queue'].put((self.task, result))
+        if result:
+            self.SQL(result)
+
+    def SQL(self, result):
+        print(result)
+        print(type(result))
+        list_key = []
+        list_value = []
+        for (key, value) in result.items():
+            list_key.append(key)
+            list_value.append(value)
+
+        keyss = ",".join(list_key)
+        valuess = "','".join(list_value)
+        print(keyss)
+        print(valuess)
+        # 打开数据库连接
+        db = pymysql.connect("localhost", "root", "123456", "result")
+
+        # 使用cursor()方法获取操作游标
+        cursor = db.cursor()
+
+        # SQL 插入语句
+
+        sqls = "INSERT INTO result(" + keyss + ") VALUES ('%s')" % (valuess)
+        try:
+            # 执行sql语句
+            cursor.execute(sqls)
+            # 提交到数据库执行
+            db.commit()
+        except:
+            # 如果发生错误则回滚
+            db.rollback()
+
+        # 关闭数据库连接
+        db.close()
 
     def on_finished(self, response, task):
         """
