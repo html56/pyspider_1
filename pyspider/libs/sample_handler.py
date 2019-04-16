@@ -22,6 +22,7 @@ class Handler(BaseHandler):
     @config(priority=2)
     def detail_page(self, response):
         return {
+            "name": "__PROJECT_NAME__",
             "url": response.url,
             "title": response.doc('title').text(),
         }
